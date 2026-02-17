@@ -21,11 +21,12 @@ from django.http import JsonResponse
 def api_root(request):
     return JsonResponse({
         "proyecto": "ReservaLab BUAP",
-        "estado": "Backend Operativo 🚀",
+        "estado": "Backend Operando",
         "versiones": {
             "python": "3.13",
-            "django": "5.x"
-        }
+            "django": "6.0.2"
+        },
+        "mensaje": "¡Hola Profe! Infraestructura lista."
     })
 
 urlpatterns = [
