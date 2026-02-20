@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SEGURIDAD: En prod usar variables, hoy hardcodeamos para la demo
 SECRET_KEY = 'django-insecure-demo-key-reservalab'
-DEBUG = False  # Importante: False simula producción
+DEBUG = True  # Importante: False simula producció / pasara true cuando se esta utilizando dentro de el local
 
 # 1. PERMITIR A RENDER
 ALLOWED_HOSTS = ['*']
@@ -18,7 +18,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'corsheaders', # 2. CORS (Angular)
+
+    # Mis Apps de ReservaLab
+    'accounts',
+    'labs',
+    'equipment',
+    'reservations',
+    'loans',
 ]
 
 MIDDLEWARE = [
@@ -77,3 +85,5 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'accounts.Usuario'
