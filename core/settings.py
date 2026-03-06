@@ -1,12 +1,17 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SEGURIDAD: En prod usar variables, hoy hardcodeamos para la demo
-SECRET_KEY = 'django-insecure-demo-key-reservalab'
-DEBUG = True  # Importante: False simula producció / pasara true cuando se esta utilizando dentro de el local
+load_dotenv() # Carga las variables del .env
+
+# Y más abajo, cambia las variables quemadas por estas:
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG') == 'True'# Importante: False simula producció / pasara true cuando se esta utilizando dentro de el local
+
 
 # 1. PERMITIR A RENDER
 ALLOWED_HOSTS = ['*']
