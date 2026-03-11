@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView
 from accounts.serializers import CustomTokenObtainPairSerializer
@@ -39,4 +39,5 @@ urlpatterns = [
     path('', api_root),
     # Esta línea es la que quita el error 404:
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/accounts/', include('accounts.urls')),
 ]
