@@ -37,7 +37,8 @@ def api_root(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', api_root),
-    # Esta línea es la que quita el error 404:
+    path('labs/', include('labs.urls')),
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/accounts/', include('accounts.urls')),
+    # Comentamos esta línea temporalmente para que no truene si no tienes el archivo
+    # path('api/accounts/', include('accounts.urls')), 
 ]

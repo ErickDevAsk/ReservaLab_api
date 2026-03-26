@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from .models import Laboratorio
+from .serializers import LaboratorioSerializer
 
-# Create your views here.
+class LaboratorioViewSet(viewsets.ModelViewSet):
+    queryset = Laboratorio.objects.all()
+    serializer_class = LaboratorioSerializer
