@@ -14,3 +14,13 @@ class Equipo(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.numero_inventario})"
+
+def clean(self):
+    if self.cantidad_disponible > self.cantidad_total:
+        raise ValidationError("La cantidad disponible no puede ser mayor a la total")
+    
+    
+def save(self, *args, **kwargs):
+    if self.cantidad_disponible > self.cantidad_total:
+        self.cantidad_disponible = self.cantidad_total
+    super().save(*args, **kwargs)

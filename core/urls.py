@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView # <--- ESTO ES LO QUE FALTA
+from django.urls import path, include
 
 def api_root(request):
     return JsonResponse({"mensaje": "Backend Operando"})
@@ -11,4 +12,5 @@ urlpatterns = [
     path('', api_root),
     # Esta línea es la que quita el error 404:
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/', include('equipment.urls')),
 ]
