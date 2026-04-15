@@ -41,5 +41,5 @@ urlpatterns = [
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/reservas/', include('reservations.urls')),
     # Comentamos esta línea temporalmente para que no truene si no tienes el archivo
-    # path('api/accounts/', include('accounts.urls')), 
+    path('api/accounts/', include('accounts.urls')), 
 ]
