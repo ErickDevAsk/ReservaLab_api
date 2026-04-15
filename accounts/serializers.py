@@ -20,7 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        # 👇 CAMBIO 1: Usamos los nombres reales del modelo
+        #Usamos los nombres reales del modelo
         fields = ['username', 'email', 'password', 'matricula_id', 'carrera_departamento']
 
     def create(self, validated_data):
