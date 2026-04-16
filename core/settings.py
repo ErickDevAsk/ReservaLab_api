@@ -2,12 +2,19 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+from dotenv import load_dotenv
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SEGURIDAD: En prod usar variables, hoy hardcodeamos para la demo
-SECRET_KEY = 'django-insecure-demo-key-reservalab'
-DEBUG = True  # Importante: False simula producció / pasara true cuando se esta utilizando dentro de el local
+load_dotenv() # Carga las variables del .env
+
+# Y más abajo, cambia las variables quemadas por estas:
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG') == 'True'# Importante: False simula producció / pasara true cuando se esta utilizando dentro de el local
+
 
 # 1. PERMITIR A RENDER
 ALLOWED_HOSTS = ['*']
@@ -19,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_simplejwt', # 1. JWT (Autenticación)
     'rest_framework',
     'corsheaders', # 2. CORS (Angular)
 
@@ -96,6 +104,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
