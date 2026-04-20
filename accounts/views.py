@@ -7,6 +7,10 @@ from django.contrib.auth import get_user_model
 from .serializers import RegisterSerializer, TecnicoSerializer
 # 👇 Importamos el permiso estricto del jefe
 from .permissions import IsAdminRole
+from rest_framework import generics
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth import get_user_model
+from .serializers import RegisterSerializer, UserProfileSerializer
 
 User = get_user_model()
 
@@ -37,3 +41,16 @@ class TecnicoViewSet(viewsets.ModelViewSet):
         # Para que el Admin no vea la lista de todos los estudiantes, 
         # filtramos la base de datos para que solo devuelva a los que son Técnicos.
         return User.objects.filter(rol__nombre_rol='Tecnico')
+# ESTA ES LA VISTA PARA EL PERFIL
+class PerfilUsuarioView(generics.RetrieveUpdateAPIView):
+    """
+    Vista que permite al estudiante ver (GET) y actualizar (PATCH) 
+    su propia información de perfil.
+    """
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # En lugar de buscar un ID en la URL, retornamos 
+        # directamente al usuario que está autenticado.
+        return self.request.user

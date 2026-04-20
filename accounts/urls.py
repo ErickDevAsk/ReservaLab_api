@@ -12,6 +12,8 @@ router = DefaultRouter()
 # GET /tecnicos/ (lista), POST /tecnicos/ (crear), PUT /tecnicos/5/ (editar), DELETE /tecnicos/5/ (borrar)
 router.register(r'tecnicos', TecnicoViewSet, basename='tecnicos')
 
+from django.urls import path
+from .views import RegisterView, PerfilUsuarioView
 
 urlpatterns = [
     # Tu ruta pública original se queda intacta
@@ -19,4 +21,6 @@ urlpatterns = [
     
     # 3. Enchufamos todas las rutas del router a nuestra app
     path('', include(router.urls)),
+    # 👇 RUTA PARA CONSULTAR Y EDITAR EL PERFIL 👇
+    path('perfil/', PerfilUsuarioView.as_view(), name='perfil'),
 ]
