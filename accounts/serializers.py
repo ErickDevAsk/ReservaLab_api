@@ -41,3 +41,14 @@ class RegisterSerializer(serializers.ModelSerializer):
             user.save()
             
         return user
+    
+# ---> EL SERIALIZER PARA EL PERFIL (GET y PATCH) <---
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User # Usamos la variable User que ya tienes definida arriba
+        fields = [
+            'username', 'email', 'matricula_id', 'carrera_departamento', 
+            'telefono', 'equipo_registrado', 'habilidades'
+        ]
+        # Bloqueamos estos campos para que nadie pueda cambiarlos desde el perfil de Angular
+        read_only_fields = ['username', 'email', 'matricula_id', 'carrera_departamento']

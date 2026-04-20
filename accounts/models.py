@@ -12,6 +12,10 @@ class Usuario(AbstractUser):
     matricula_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     carrera_departamento = models.CharField(max_length=100, null=True, blank=True)
     rol = models.ForeignKey(Rol, on_delete=models.PROTECT, null=True, blank=True)
+    telefono = models.CharField(max_length=15, null=True, blank=True)
+    equipo_registrado = models.CharField(max_length=150, null=True, blank=True)
+    # Usamos TextField para que quepan muchas habilidades separadas por comas
+    habilidades = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.username} - {self.matricula_id}"
