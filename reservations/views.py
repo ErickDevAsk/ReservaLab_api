@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from accounts.permissions import IsAdminOrTecnico
 from .serializers import CrearReservaSerializer
 from .models import Reserva
 
@@ -34,3 +36,39 @@ class CrearReservaView(APIView):
             }, status=status.HTTP_201_CREATED)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class AprobarReservaView(APIView):
+    # ¡Candado puesto! Solo Admin o Técnicos pueden aprobar
+    permission_classes = [IsAdminOrTecnico]
+
+    def patch(self, request, pk):
+        # Buscamos la reserva en la base de datos (si no existe, lanza error 404 automático)
+        reserva = get_object_or_404(Reserva, pk=pk)
+        
+        # Cambiamos el estado y guardamos
+        reserva.estado = 'Aprobada'
+        reserva.save()
+        
+        return Response({
+            "mensaje": f"La reserva de {reserva.usuario.username} ha sido APROBADA.",
+            "estado": reserva.estado
+        }, status=status.HTTP_200_OK)
+
+
+# ==========================================
+# ❌ ENDPOINT PARA RECHAZAR RESERVA
+# ==========================================
+class RechazarReservaView(APIView):
+    # ¡Candado puesto!
+    permission_classes = [IsAdminOrTecnico]
+
+    def patch(self, request, pk):
+        reserva = get_object_or_404(Reserva, pk=pk)
+        
+        reserva.estado = 'Rechazada'
+        reserva.save()
+        
+        return Response({
+            "mensaje": f"La reserva de {reserva.usuario.username} ha sido RECHAZADA.",
+            "estado": reserva.estado
+        }, status=status.HTTP_200_OK)
