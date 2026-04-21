@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from .models import Prestamo
+from .serializers import LoanSerializer
 
-# Create your views here.
+class LoanViewSet(viewsets.ModelViewSet):
+    queryset = Prestamo.objects.all()
+    serializer_class = LoanSerializer

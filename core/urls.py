@@ -6,10 +6,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView # <--- ESTO ES LO
 from django.urls import path, include
 
 from rest_framework_simplejwt.views import TokenObtainPairView
-from accounts.serializers import CustomTokenObtainPairSerializer
 
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
 
 def api_root(request):
     return JsonResponse({"mensaje": "Backend Operando"})
@@ -23,9 +20,10 @@ urlpatterns = [
     path('api/', include('equipment.urls')),
 
     path('labs/', include('labs.urls')),
-    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+
     path('api/reservas/', include('reservations.urls')),
     # Comentamos esta línea temporalmente para que no truene si no tienes el archivo
     path('api/accounts/', include('accounts.urls')), 
+    path('api/loans/', include('loans.urls')),
 
 ]

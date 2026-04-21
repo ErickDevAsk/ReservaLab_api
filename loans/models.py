@@ -22,3 +22,4 @@ class Incidencia(models.Model):
 
     def __str__(self):
         return f"Incidencia: {self.equipo.nombre}"
+
