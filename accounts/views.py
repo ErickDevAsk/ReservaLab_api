@@ -3,6 +3,7 @@ from rest_framework import generics, viewsets # 👈 Agregamos viewsets
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
 
+
 # 👇 Importamos los dos serializers que ya tienes
 from .serializers import RegisterSerializer, TecnicoSerializer
 # 👇 Importamos el permiso estricto del jefe
@@ -11,6 +12,11 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model
 from .serializers import RegisterSerializer, UserProfileSerializer
+
+from .serializers import RegisterSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 User = get_user_model()
 
@@ -26,7 +32,6 @@ class RegisterView(generics.CreateAPIView):
     
     # Le conectamos el serializer de registro
     serializer_class = RegisterSerializer
-
 
 # ==========================================
 # 🛡️ PUERTA VIP: CRUD DE TÉCNICOS (SOLO ADMIN)
@@ -54,3 +59,19 @@ class PerfilUsuarioView(generics.RetrieveUpdateAPIView):
         # En lugar de buscar un ID en la URL, retornamos 
         # directamente al usuario que está autenticado.
         return self.request.user
+
+class CustomTokenSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # 🔥 ESTE ES EL FIX REAL
+        token['rol'] = user.rol.nombre_rol.lower()
+
+        return token
+
+
+class CustomTokenView(TokenObtainPairView):
+    serializer_class = CustomTokenSerializer
+
