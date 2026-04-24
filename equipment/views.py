@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 from .models import Equipo
 from .serializers import EquipoSerializer
-<<<<<<< HEAD
 # nuestro cadenero desde accounts
 from accounts.permissions import IsAdminOrTecnico 
 
@@ -11,9 +10,3 @@ class EquipoViewSet(viewsets.ModelViewSet):
     
     # CANDADO
     permission_classes = [IsAdminOrTecnico]
-=======
-
-class EquipoViewSet(viewsets.ModelViewSet):
-    queryset = Equipo.objects.all()
-    serializer_class = EquipoSerializer
->>>>>>> dev_Angel_api

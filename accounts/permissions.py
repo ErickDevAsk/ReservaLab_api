@@ -14,7 +14,7 @@ class IsAdminOrTecnico(permissions.BasePermission):
             return False
             
         # 3. Solo pasan si su rol es 'Admin' o 'Tecnico'
-        return request.user.rol.nombre_rol in ['Admin', 'Tecnico']
+        return request.user.rol.nombre_rol in ['Admininistrador', 'Tecnico']
 
 
 class IsAdminRole(permissions.BasePermission):
@@ -29,4 +29,4 @@ class IsAdminRole(permissions.BasePermission):
             return False
             
         # Solo pasa el jefe
-        return request.user.rol.nombre_rol == 'Admin'
+        return request.user.rol.nombre_rol == 'Administrador'
