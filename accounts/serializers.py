@@ -46,22 +46,22 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 # ---> EL SERIALIZER PARA EL CRUD DE TÉCNICOS (SOLO ADMIN) <---
 class TecnicoSerializer(serializers.ModelSerializer):
-    # Forzamos que el password sea de solo escritura (no se manda cuando haces un GET)
     password = serializers.CharField(write_only=True, required=False, style={'input_type': 'password'})
 
     class Meta:
         model = User
-        # Campos que el admin puede ver y modificar del técnico
-        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', 'rol']
+        # ⬇️ AGREGA ESTOS DOS CAMPOS AQUÍ ⬇️
+        fields = [
+            'id', 'username', 'email', 'password', 'first_name', 
+            'last_name', 'rol', 'matricula_id', 'carrera_departamento'
+        ]
 
     def create(self, validated_data):
-        # Encriptamos la contraseña obligatoriamente al crear
         if 'password' in validated_data:
             validated_data['password'] = make_password(validated_data.get('password'))
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        # Si el Admin edita al técnico y le cambia la contraseña, la volvemos a encriptar
         if 'password' in validated_data:
             validated_data['password'] = make_password(validated_data.get('password'))
         return super().update(instance, validated_data)

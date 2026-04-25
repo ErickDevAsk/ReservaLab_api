@@ -67,7 +67,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         # 🔥 ESTE ES EL FIX REAL
-        token['rol'] = user.rol.nombre_rol.lower()
+        token['rol'] = user.rol.nombre_rol
 
         return token
 
