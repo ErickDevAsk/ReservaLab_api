@@ -7,6 +7,4 @@ from accounts.permissions import IsAdminOrTecnico
 class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
     serializer_class = EquipoSerializer
-    
-    # CANDADO
     permission_classes = [IsAdminOrTecnico]
