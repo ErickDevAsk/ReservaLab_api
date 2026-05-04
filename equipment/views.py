@@ -10,5 +10,5 @@ class EquipoViewSet(viewsets.ModelViewSet):
     serializer_class = EquipoSerializer
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return [IsAdminOrTecnico()]

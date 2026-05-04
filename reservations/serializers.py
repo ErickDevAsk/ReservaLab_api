@@ -4,18 +4,18 @@ from labs.models import Laboratorio
 from .models import Reserva
 
 class CrearReservaSerializer(serializers.Serializer):
-    # Recibimos los datos exactos que acordaste con Erick (Frontend)
-    laboratorio = serializers.CharField()
+    # Ya no recibimos texto, ahora recibimos el ID numérico
+    laboratorio = serializers.IntegerField() 
     fecha = serializers.DateField()
     hora_inicio = serializers.TimeField()
     duracion = serializers.IntegerField(min_value=1, max_value=4)
-    equipo = serializers.CharField(required=False, allow_blank=True) # Lo recibimos, pero aún no lo guardaremos
+    equipo = serializers.CharField(required=False, allow_blank=True) 
     proposito = serializers.CharField(min_length=10)
 
     def validate(self, data):
-        # 1. Verificar que el laboratorio exista en la BD
+        # 1. Verificar que el laboratorio exista en la BD (ahora buscando por 'id')
         try:
-            lab = Laboratorio.objects.get(nombre=data['laboratorio'])
+            lab = Laboratorio.objects.get(id=data['laboratorio'])
         except Laboratorio.DoesNotExist:
             raise serializers.ValidationError({"laboratorio": "El laboratorio ingresado no existe."})
 
