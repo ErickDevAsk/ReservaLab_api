@@ -110,3 +110,27 @@ class AprobarReservaView(APIView):
             "mensaje": f"La reserva de {reserva.usuario.username} ha sido APROBADA.",
             "estado": reserva.estado
         }, status=status.HTTP_200_OK)
+
+class MisReservasView(APIView):
+    permission_classes = [IsAuthenticated] # Solo usuarios logueados
+
+    def get(self, request):
+        # Filtramos por el usuario que está haciendo la petición
+        # Y las ordenamos por fecha más reciente
+        reservas = Reserva.objects.filter(usuario=request.user).order_by('-fecha', '-hora_inicio')
+        
+        data = []
+        for r in reservas:
+            data.append({
+                "id": r.id,
+                # Intentamos sacar el nombre del lab, si no, mandamos su ID
+                "laboratorio": getattr(r.laboratorio, 'nombre', r.laboratorio_id), 
+                "fecha": str(r.fecha),
+                "hora_inicio": str(r.hora_inicio),
+                "hora_fin": str(r.hora_fin),
+                "motivo": r.motivo,
+                "estado": r.estado
+            })
+            
+        return Response(data, status=status.HTTP_200_OK)
+    
