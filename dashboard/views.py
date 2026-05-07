@@ -8,6 +8,8 @@ from reservations.models import Reserva
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+from equipment.models import Incidencia, Equipo
+from django.db.models import Sum
 
 User = get_user_model()
 
@@ -68,3 +70,104 @@ class AdminDashboardView(APIView):
     
 class TecnicoDashboardView(APIView):
     permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        hoy = timezone.now().date()
+        # --- 1. Alertas de dispositivos dañados ---
+        # Buscamos las incidencias que no se han resuelto
+        # El [:5] es para traer solo las 5 más recientes y no saturar la cajita
+        incidencias = Incidencia.objects.filter(
+            estado__in=['Pendiente', 'En Reparacion']
+        ).order_by('-fecha_reporte')[:5]
+
+        alertas_danos = []
+        for inc in incidencias:
+            alertas_danos.append({
+                "id": inc.id,
+                "equipo_nombre": inc.equipo.nombre,
+                "descripcion": inc.descripcion,
+                "estado": inc.estado,
+                # Formateamos la fecha para que Angular la lea bonito
+                "fecha": inc.fecha_reporte.strftime("%Y-%m-%d %H:%M") 
+            })
+
+        # --- 2. Retornar el JSON ---
+        # Aquí después puedes agregar más cosas si el dashboard del técnico pide 
+        # "préstamos de hoy" o algo así, por ahora mandamos las alertas.
+        prestamos_activos = Prestamo.objects.filter(estado='Aprobado    ').order_by('fecha_devolucion_prevista')[:5]
+
+        lista_devoluciones = []
+        for p in prestamos_activos:
+            # Extraemos solo la fecha (sin la hora) para comparar
+            fecha_dev = p.fecha_devolucion_prevista.date() if hasattr(p.fecha_devolucion_prevista, 'date') else p.fecha_devolucion_prevista
+
+            # Lógica de los colores/estados
+            if fecha_dev < hoy:
+                estado_tag = 'Vencido'
+            elif fecha_dev <= hoy + timedelta(days=2):
+                estado_tag = 'Vence pronto'
+            else:
+                estado_tag = 'Vigente'
+
+            # Intentamos sacar el nombre completo, si no, usamos el username
+            nombre_estudiante = p.usuario.get_full_name() if p.usuario.get_full_name() else p.usuario.username
+
+            lista_devoluciones.append({
+                "id": p.id,
+                "estudiante": nombre_estudiante,
+                "equipo": p.equipo.nombre,
+                "codigo": p.equipo.numero_inventario,
+                "fecha": p.fecha_devolucion_prevista.strftime("%d/%m/%Y"),
+                "estado": estado_tag
+            })
+
+                # --- 4. Datos para Gráficas (ngx-charts format) ---
+        ocupacion_semanal = [
+            {"name": "Lun", "value": 75},
+            {"name": "Mar", "value": 82},
+            {"name": "Mié", "value": 68},
+            {"name": "Jue", "value": 90},
+            {"name": "Vie", "value": 85},
+            {"name": "Sáb", "value": 45},
+            {"name": "Dom", "value": 30},
+        ]
+
+        tendencia_reservas = [{
+            "name": "Reservas",
+            "series": [
+                {"name": "Ene", "value": 20},
+                {"name": "Feb", "value": 35},
+                {"name": "Mar", "value": 40},
+                {"name": "Abr", "value": 50},
+                {"name": "May", "value": 65},
+                {"name": "Jun", "value": 80},
+            ]
+        }]
+
+        # --- 5. Contadores Superiores (KPIs) ---
+        
+        # 1. Reservas Hoy
+        reservas_hoy_count = Reserva.objects.filter(fecha=hoy).count()
+
+        # 2. Equipos Disponibles (Sumamos la cantidad_disponible de todos los equipos)
+        # Usamos 'or 0' por si la base de datos está vacía y devuelve None
+        suma_equipos = Equipo.objects.aggregate(total=Sum('cantidad_disponible'))['total'] or 0
+
+        # 3. Devoluciones Pendientes (Usamos la variable que ya filtraste arriba para la tabla)
+        # Nota: asegúrate de usar la variable donde hiciste el .filter() de los préstamos
+        devoluciones_count = prestamos_activos.count()
+
+        # 4. Equipos en Mantenimiento (Contamos las incidencias que no están resueltas)
+        mantenimiento_count = Incidencia.objects.filter(estado__in=['Pendiente', 'En Reparacion']).count()
+
+        # --- 3. Retornamos todo junto ---
+        return Response({
+            'alertas_danos': alertas_danos,
+            'devoluciones_pendientes': lista_devoluciones,
+            'ocupacion_semanal': ocupacion_semanal,
+            'tendencia_reservas': tendencia_reservas,
+            'reservas_hoy': reservas_hoy_count,
+            'equipos_disponibles': suma_equipos,
+            'total_devoluciones': devoluciones_count,
+            'equipos_mantenimiento': mantenimiento_count
+        })
