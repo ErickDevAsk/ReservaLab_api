@@ -71,7 +71,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User # Usamos la variable User que ya tienes definida arriba
         fields = [
-            'username', 'email', 'matricula_id', 'carrera_departamento', 
+            'username', 'email', 'first_name', 'last_name', 'matricula_id', 'carrera_departamento', 
             'telefono', 'equipo_registrado', 'habilidades'
         ]
         # Bloqueamos estos campos para que nadie pueda cambiarlos desde el perfil de Angular
