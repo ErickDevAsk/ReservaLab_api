@@ -1,15 +1,16 @@
 from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.db.models import Sum, Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from labs.models import Laboratorio
 from loans.models import Prestamo
 from reservations.models import Reserva
-from django.contrib.auth import get_user_model
-from django.utils import timezone
 from datetime import timedelta
 from equipment.models import Incidencia, Equipo
-from django.db.models import Sum
+
 
 User = get_user_model()
 
@@ -170,4 +171,95 @@ class TecnicoDashboardView(APIView):
             'equipos_disponibles': suma_equipos,
             'total_devoluciones': devoluciones_count,
             'equipos_mantenimiento': mantenimiento_count
+        })
+
+class TecnicoReportesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        hoy = timezone.now()
+        # Obtenemos el primer día del mes actual para calcular "Nuevos usuarios"
+        inicio_mes = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        # --- 1. KPIs (Tarjetas Superiores) ---
+        total_prestamos = Prestamo.objects.count()
+        
+        # Ajusta 'date_joined' si el campo de fecha de registro de tu User se llama diferente
+        nuevos_usuarios = User.objects.filter(date_joined__gte=inicio_mes).count()
+        
+        # Ajusta 'Confirmada' al estado que uses en tu modelo Reserva
+        reservas_activas = Reserva.objects.filter(estado='Confirmada').count()
+
+        # Cálculo de Tasa de Ocupación
+        total_equipos = Equipo.objects.aggregate(total=Sum('cantidad_total'))['total'] or 1
+        equipos_en_uso = Prestamo.objects.filter(estado='Activo').count()
+        tasa_ocupacion = round((equipos_en_uso / total_equipos) * 100) if total_equipos > 0 else 0
+
+        # --- 2. Datos para Gráficas ---
+        
+        # A) Gráfica de Dona: Top Equipos o Categorías
+        # Agrupamos los préstamos para ver qué es lo que más se pide.
+        # *Nota: Si tu modelo Equipo tiene categoría, puedes cambiar 'equipo__nombre' por 'equipo__categoria__nombre'
+        distribucion = Prestamo.objects.values('equipo__nombre').annotate(total=Count('id')).order_by('-total')[:5]
+        
+        pie_chart_data = []
+        for item in distribucion:
+            pie_chart_data.append({
+                "name": item['equipo__nombre'], 
+                "value": item['total']
+            })
+            
+        # Si la base de datos está vacía, mandamos un valor por defecto para que la dona no desaparezca
+        if not pie_chart_data:
+            pie_chart_data = [{"name": "Aún sin préstamos", "value": 1}]
+
+        # B) Gráficas de Línea y Barras: Tendencia de los últimos 7 días
+        line_series = []
+        bar_chart_data = []
+        dias_semana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+        
+        for i in range(6, -1, -1):
+            fecha_evaluar = hoy.date() - timedelta(days=i)
+            nombre_dia = dias_semana[fecha_evaluar.weekday()]
+            
+            # 1. Contamos las reservas de ese día (usando tu campo 'fecha' de Reserva)
+            cant_reservas = Reserva.objects.filter(fecha=fecha_evaluar).count()
+            
+            # 2. Contamos los préstamos. 
+            # ⚠️ IMPORTANTE: Ajusta 'fecha_devolucion_prevista' al campo donde guardas cuándo se hizo el préstamo (ej. 'fecha_prestamo' o 'fecha_inicio')
+            cant_prestamos = Prestamo.objects.filter(fecha_devolucion_prevista__date=fecha_evaluar).count() 
+            
+            # Armamos la línea (Tendencia Mensual / Semanal)
+            line_series.append({
+                "name": f"{nombre_dia} {fecha_evaluar.day}",
+                "value": cant_prestamos
+            })
+            
+            # Armamos las barras (Ocupación vs Reservas)
+            bar_chart_data.append({
+                "name": nombre_dia,
+                "series": [
+                    {"name": "Préstamos", "value": cant_prestamos},
+                    {"name": "Reservas", "value": cant_reservas}
+                ]
+            })
+
+        line_chart_data = [{
+            "name": "Préstamos",
+            "series": line_series
+        }]
+
+        # --- 3. Retornar JSON ---
+        return Response({
+            "kpis": {
+                "total_prestamos": total_prestamos,
+                "nuevos_usuarios": nuevos_usuarios,
+                "tasa_ocupacion": tasa_ocupacion,
+                "reservas_activas": reservas_activas
+            },
+            "graficas": {
+                "pie_chart": pie_chart_data,
+                "bar_chart": bar_chart_data,
+                "line_chart": line_chart_data
+            }
         })
