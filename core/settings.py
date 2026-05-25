@@ -75,14 +75,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # Base de datos (SQLite por hoy para no fallar en la demo)
-DATABASES = {
-    'default': dj_database_url.config(
-        # Si encuentra la variable de Render (producción), la usa. 
-        # Si no la encuentra (local), usa tu SQLite de siempre para que puedas probar en tu compu.
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
-    )
-}
+import os
+
+if os.getenv('DATABASE_URL'):
+    # 👇 CONFIGURACIÓN PARA PRODUCCIÓN (RENDER + SUPABASE)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres', # Por defecto en Supabase es postgres
+            'USER': 'postgres', # Por defecto en Supabase es postgres
+            'PASSWORD': 'MU&X32unFj2.y/@', # <-- Pon tu contraseña limpia aquí
+            'HOST': 'db.shrzucphsaieewkgjahd.supabase.co', # <-- Copia el Host que te da Supabase
+            'PORT': '5432', # El puerto pooler de Supabase suele ser 6543 o 5432
+        }
+    }
+else:
+    # 👇 CONFIGURACIÓN PARA DESARROLLO LOCAL (TU COMPUTADORA)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [] 
 
