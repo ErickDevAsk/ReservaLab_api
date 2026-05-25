@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-
+import dj_database_url
 from dotenv import load_dotenv
 
 
@@ -17,7 +17,7 @@ DEBUG = os.getenv('DEBUG') == 'True'# Importante: False simula producció / pasa
 
 
 # 1. PERMITIR A RENDER
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['reservalab-api.onrender.com', '127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -76,10 +76,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Base de datos (SQLite por hoy para no fallar en la demo)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Si encuentra la variable de Render (producción), la usa. 
+        # Si no la encuentra (local), usa tu SQLite de siempre para que puedas probar en tu compu.
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [] 

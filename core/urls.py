@@ -16,7 +16,7 @@ urlpatterns = [
     path('api/token/', CustomTokenView.as_view(), name='token_obtain_pair'),
     
     path('api/', include('equipment.urls')),
-    path('labs/', include('labs.urls')),
+    path('api/labs/', include('labs.urls')),
     path('api/reservas/', include('reservations.urls')),
     
     # 👇 3. Descomenta esto si ya tienes listo tu accounts/urls.py
