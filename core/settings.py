@@ -78,19 +78,20 @@ WSGI_APPLICATION = 'core.wsgi.application'
 import os
 
 if os.getenv('DATABASE_URL'):
-    # 👇 CONFIGURACIÓN PARA PRODUCCIÓN (RENDER + SUPABASE)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'postgres', # Por defecto en Supabase es postgres
-            'USER': 'postgres', # Por defecto en Supabase es postgres
-            'PASSWORD': 'MU&X32unFj2.y/@', # <-- Pon tu contraseña limpia aquí
-            'HOST': 'db.shrzucphsaieewkgjahd.supabase.co', # <-- Copia el Host que te da Supabase
-            'PORT': '5432', # El puerto pooler de Supabase suele ser 6543 o 5432
+            'NAME': 'postgres',
+            'USER': 'postgres.shrzucphsaieewkgjahd',
+            'PASSWORD': 'MU&X32unFj2.y/@', 
+            'HOST': 'aws-1-us-west-2.pooler.supabase.com', 
+            'PORT': '5432', 
+            'OPTIONS': {
+                'connect_timeout': 5,
+            }
         }
     }
 else:
-    # 👇 CONFIGURACIÓN PARA DESARROLLO LOCAL (TU COMPUTADORA)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
